@@ -83,6 +83,9 @@ public abstract class BeanFactoryUtils {
 		if (!name.startsWith(BeanFactory.FACTORY_BEAN_PREFIX)) {
 			return name;
 		}
+		//name是以&开头的，说明要拿的是FactoryBean实例对象
+		//transformedBeanNameCache 缓存处理完&开头的name后的beaName
+		//map.computeIfAbsent map中对应的key为null或者key的value为null时，put才会成功，否则会失败。返回value值
 		return transformedBeanNameCache.computeIfAbsent(name, beanName -> {
 			do {
 				beanName = beanName.substring(BeanFactory.FACTORY_BEAN_PREFIX.length());

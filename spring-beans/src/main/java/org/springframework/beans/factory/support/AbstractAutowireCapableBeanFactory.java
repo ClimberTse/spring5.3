@@ -506,17 +506,24 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (logger.isTraceEnabled()) {
 			logger.trace("Creating instance of bean '" + beanName + "'");
 		}
+		//mbdToUse 创建实例使用的 bd
 		RootBeanDefinition mbdToUse = mbd;
 
 		// Make sure bean class is actually resolved at this point, and
 		// clone the bean definition in case of a dynamically resolved Class
 		// which cannot be stored in the shared merged bean definition.
+		//判断当前mbd中的class是否已经加载到jvm，如果未加载，则使用类加载器将classStr加载到Jvm中，并且返回Class对象
 		Class<?> resolvedClass = resolveBeanClass(mbd, beanName);
+
+		//条件一：拿到mbd实例化对象是真实Class对象
+		//条件二：mbd在 resolvedClass之前是没有Class对象的
+		//条件三：说明mbd有 className
 		if (resolvedClass != null && !mbd.hasBeanClass() && mbd.getBeanClassName() != null) {
 			mbdToUse = new RootBeanDefinition(mbd);
 			mbdToUse.setBeanClass(resolvedClass);
 		}
 
+		//预处理...
 		// Prepare method overrides.
 		try {
 			mbdToUse.prepareMethodOverrides();
@@ -526,8 +533,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					beanName, "Validation of method overrides failed", ex);
 		}
 
+		//
 		try {
 			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
+			//可用通过后置处理器，在这一步返回一个代理实例对象。注意：这里的代理对象不是Spring AOP 逻辑实现的地方
+			//调用点：创建实例之前的一个调用点
 			Object bean = resolveBeforeInstantiation(beanName, mbdToUse);
 			if (bean != null) {
 				return bean;
@@ -539,6 +549,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		try {
+			//核心方法：创建bean实例对象，bean 生命周期大部分阶段在这里
 			Object beanInstance = doCreateBean(beanName, mbdToUse, args);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Finished creating instance of bean '" + beanName + "'");
@@ -574,11 +585,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws BeanCreationException {
 
 		// Instantiate the bean.
+		//包装对象，内部最核心的自动就是咱们的真实实力。它提供了一些额外的接口方法，比如属性访问器
 		BeanWrapper instanceWrapper = null;
+
+		//缓存中拿一下bean
 		if (mbd.isSingleton()) {
 			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
 		}
+		//一般为空
 		if (instanceWrapper == null) {
+			//该方法创建出来真实的bean实例，并且将其包装到BeanWrapper实例中
 			instanceWrapper = createBeanInstance(beanName, mbd, args);
 		}
 		Object bean = instanceWrapper.getWrappedInstance();
@@ -1179,8 +1195,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	protected BeanWrapper createBeanInstance(String beanName, RootBeanDefinition mbd, @Nullable Object[] args) {
 		// Make sure bean class is actually resolved at this point.
+		//返回mbd中真实bean的Class对象
 		Class<?> beanClass = resolveBeanClass(mbd, beanName);
 
+		//表达的意思是：class是非公开类型的，也可以创建实例，反之false，说明是无法创建
 		if (beanClass != null && !Modifier.isPublic(beanClass.getModifiers()) && !mbd.isNonPublicAccessAllowed()) {
 			throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 					"Bean class isn't public, and non-public access not allowed: " + beanClass.getName());
@@ -1191,44 +1209,62 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return obtainFromSupplier(instanceSupplier, beanName);
 		}
 
+		//bean标签中配置了 factory-method 的情况处理
 		if (mbd.getFactoryMethodName() != null) {
 			return instantiateUsingFactoryMethod(beanName, mbd, args);
 		}
 
 		// Shortcut when re-creating the same bean...
+		//resolved 表示bd对应的构造信息是否已经解析成可以反射调用的构造方法method信息了
 		boolean resolved = false;
+		//是否自动匹配构造方法
 		boolean autowireNecessary = false;
 		if (args == null) {
 			synchronized (mbd.constructorArgumentLock) {
+				//条件成立：说明bd的构造信息已经转化成可以反射调用的method了
 				if (mbd.resolvedConstructorOrFactoryMethod != null) {
 					resolved = true;
+					//当resolvedConstructorOrFactoryMethod 有值时 且 构造方法有参数，那么可以认为这个字段就是true
+					//什么情况下这个字段是false？
+					//	1.resolvedConstructorOrFactoryMethod == null
+					//	2.当 resolvedConstructorOrFactoryMethod 表示的是默认的无参构造方法
 					autowireNecessary = mbd.constructorArgumentsResolved;
 				}
 			}
 		}
 		if (resolved) {
 			if (autowireNecessary) {
+				//有构造参数，那么就需要根据参数去匹配合适的构造方法了
+				//拿出当前Class的所有构造器，然后根据参数信息选择一个最优的构造器
 				return autowireConstructor(beanName, mbd, null, null);
 			}
 			else {
+				//无参构造方法处理
 				return instantiateBean(beanName, mbd);
 			}
 		}
 
 		// Candidate constructors for autowiring?
+		//典型的应用：@Autowire 注解打在了构造方法上
 		Constructor<?>[] ctors = determineConstructorsFromBeanPostProcessors(beanClass, beanName);
+		//条件一：后处理制定了构造方法数组
+		//条件二：mbd autowiredMode 一般情况是 no
+		//条件三：成立：bean信息中配置了构造器的参数信息
+		//条件四：getBean时，args有参数
 		if (ctors != null || mbd.getResolvedAutowireMode() == AUTOWIRE_CONSTRUCTOR ||
 				mbd.hasConstructorArgumentValues() || !ObjectUtils.isEmpty(args)) {
 			return autowireConstructor(beanName, mbd, ctors, args);
 		}
 
 		// Preferred constructors for default construction?
+		//一般不成立
 		ctors = mbd.getPreferredConstructors();
 		if (ctors != null) {
 			return autowireConstructor(beanName, mbd, ctors, null);
 		}
 
 		// No special handling: simply use no-arg constructor.
+		//未指定构造参数，未指定，使用默认的无参构造器创建实例
 		return instantiateBean(beanName, mbd);
 	}
 

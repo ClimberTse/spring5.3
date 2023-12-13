@@ -145,7 +145,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 				// We cannot use Profiles.of(...) since profile expressions are not supported
 				// in XML config. See SPR-12458 for details.
 
-				//条件成立：改beans标签不在继续解析
+				//条件成立：该beans标签不在继续解析
 				if (!getReaderContext().getEnvironment().acceptsProfiles(specifiedProfiles)) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Skipped XML bean definition file due to specified profiles [" + profileSpec +
@@ -334,7 +334,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		//解析完成后返回bdHolder，bdHolder 主要是保存了 bean 标签上的别名信息.
 		BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
 		if (bdHolder != null) {
-			//如果beanDefinition 需要装饰，这里会进行处理，朱啊哟是处理 自定义 属性.
+			//如果beanDefinition 需要装饰，这里会进行处理，主要是处理 自定义 属性.
 			bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
 			try {
 				// Register the final decorated instance.

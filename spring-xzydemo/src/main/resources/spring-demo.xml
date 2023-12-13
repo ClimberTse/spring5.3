@@ -2,7 +2,10 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-	<bean scope="singleton" id="userService" class="com.xzy.UserServiceImpl">
+	<bean scope="singleton" id="userService" class="com.xzy.service.impl.UserServiceImpl">
+	</bean>
 
+	<bean scope="singleton" id="orderService" class="com.xzy.service.impl.OrderServiceImpl">
+		<property name="userService" ref="userService"/>
 	</bean>
 </beans>
