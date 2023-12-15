@@ -1304,7 +1304,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	protected String transformedBeanName(String name) {
 		//处理完&符开头的name
-		//name 是最终哦昂指吗？不是，它还可能是别名
+		//name 是最终值吗？不是，它还可能是别名
 		//aliasMap 保存别名信息
 		return canonicalName(BeanFactoryUtils.transformedBeanName(name));
 	}
@@ -1922,7 +1922,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			if (!(beanInstance instanceof FactoryBean)) {
 				throw new BeanIsNotAFactoryException(beanName, beanInstance.getClass());
 			}
-			//给当前bean实例大哥标记，记录是FactoryBean
+			//给当前bean实例打个标记，记录是FactoryBean
 			if (mbd != null) {
 				mbd.isFactoryBean = true;
 			}

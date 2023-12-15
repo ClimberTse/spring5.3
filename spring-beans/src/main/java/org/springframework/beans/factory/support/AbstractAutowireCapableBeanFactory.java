@@ -585,7 +585,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws BeanCreationException {
 
 		// Instantiate the bean.
-		//包装对象，内部最核心的自动就是咱们的真实实力。它提供了一些额外的接口方法，比如属性访问器
+		//包装对象，内部最核心的自动就是咱们的真实实例。它提供了一些额外的接口方法，比如属性访问器
 		BeanWrapper instanceWrapper = null;
 
 		//缓存中拿一下bean
@@ -1257,7 +1257,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		// Preferred constructors for default construction?
-		//一般不成立
+		//找出最合适的默认构造方法，一般不成立
 		ctors = mbd.getPreferredConstructors();
 		if (ctors != null) {
 			return autowireConstructor(beanName, mbd, ctors, null);
