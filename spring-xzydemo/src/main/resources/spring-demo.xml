@@ -3,14 +3,17 @@
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   xmlns:context="http://www.springframework.org/schema/context"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
-<!--	<bean scope="singleton" id="userService" class="com.xzy.service.impl.UserServiceImpl">-->
-<!--		<constructor-arg name="userName" value="yongge"/>-->
-<!--	</bean>-->
+	<bean scope="singleton" id="userService" class="com.xzy.service.impl.UserServiceImpl" parent="userServiceParent">
+	</bean>
 
-<!--	<bean scope="singleton" id="orderService" class="com.xzy.service.impl.OrderServiceImpl">-->
-<!--		<property name="userService" ref="userService"/>-->
-<!--	</bean>-->
+	<bean scope="singleton" id="orderService" class="com.xzy.service.impl.OrderServiceImpl" abstract="true">
+		<property name="userService" ref="userService"/>
+	</bean>
 
-	<context:component-scan base-package="com.xzy.service.*">
-	</context:component-scan>
+	<bean id="userServiceParent" class="com.xzy.service.impl.UserServiceParent">
+		<property name="address" value="深圳宝安"/>
+	</bean>
+
+<!--	<context:component-scan base-package="com.xzy.service.*">-->
+<!--	</context:component-scan>-->
 </beans>

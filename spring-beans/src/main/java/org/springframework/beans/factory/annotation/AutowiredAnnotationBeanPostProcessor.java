@@ -411,8 +411,10 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 	@Override
 	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
+		//包装着当前bd需要注入的注解信息集合，@Autowired @Value @Inject 信息元数据
 		InjectionMetadata metadata = findAutowiringMetadata(beanName, bean.getClass(), pvs);
 		try {
+			//注入，将注解信息解析后注入到 pvs 中
 			metadata.inject(bean, beanName, pvs);
 		}
 		catch (BeanCreationException ex) {
@@ -467,7 +469,9 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 					if (metadata != null) {
 						metadata.clear(pvs);
 					}
+					//查询出当前clazz的 注解信息
 					metadata = buildAutowiringMetadata(clazz);
+					//将注解信息存入缓存，key是当前beanName，value 即是当前class上的注解信息
 					this.injectionMetadataCache.put(cacheKey, metadata);
 				}
 			}
@@ -701,7 +705,10 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			else {
 				value = resolveFieldValue(field, bean, beanName);
 			}
+
+			//条件成立：说明根据依赖信息到容器内获取到依赖对象了
 			if (value != null) {
+				//使用反射技术将value赋值给当前bean的该字段field中，
 				ReflectionUtils.makeAccessible(field);
 				field.set(bean, value);
 			}
@@ -709,6 +716,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 		@Nullable
 		private Object resolveFieldValue(Field field, Object bean, @Nullable String beanName) {
+			//根据注解描述的字段和require信息 创建剪出来 依赖信息描述的对象
 			DependencyDescriptor desc = new DependencyDescriptor(field, this.required);
 			desc.setContainingClass(bean.getClass());
 			Set<String> autowiredBeanNames = new LinkedHashSet<>(2);
@@ -716,6 +724,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			TypeConverter typeConverter = beanFactory.getTypeConverter();
 			Object value;
 			try {
+				//解析出来真实的依赖对象
 				value = beanFactory.resolveDependency(desc, beanName, autowiredBeanNames, typeConverter);
 			}
 			catch (BeansException ex) {

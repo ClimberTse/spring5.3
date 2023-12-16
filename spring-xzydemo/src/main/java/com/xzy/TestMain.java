@@ -21,7 +21,7 @@ public class TestMain {
 //		BeanDefinitionReader bdr = new XmlBeanDefinitionReader(beanFactory);
 //		bdr.loadBeanDefinitions(resource);
 //
-		IUserService userService = (IUserService) beanFactory.getBean("userServiceImpl");
+		IUserService userService = (IUserService) beanFactory.getBean("userService");
 		System.out.println(userService.getUser("123"));
 	}
 }
