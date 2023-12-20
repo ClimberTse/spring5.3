@@ -1160,6 +1160,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public void destroySingleton(String beanName) {
+		//会将beanFactory内部维护的单实例全部清掉，并且哪个bean如果实现了disposable接口，还会进行bean的destroy处理
 		super.destroySingleton(beanName);
 		removeManualSingletonName(beanName);
 		clearByTypeCache();

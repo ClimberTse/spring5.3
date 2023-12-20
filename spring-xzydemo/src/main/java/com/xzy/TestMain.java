@@ -1,5 +1,7 @@
 package com.xzy;
 
+import com.xzy.entity.User;
+import com.xzy.entity.UserFactory;
 import com.xzy.service.IUserService;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
@@ -21,7 +23,13 @@ public class TestMain {
 //		BeanDefinitionReader bdr = new XmlBeanDefinitionReader(beanFactory);
 //		bdr.loadBeanDefinitions(resource);
 //
-		IUserService userService = (IUserService) beanFactory.getBean("userService");
-		System.out.println(userService.getUser("123"));
+//		IUserService userService = (IUserService) beanFactory.getBean("userService");
+//		System.out.println(userService.getUser("123"));
+
+		User user = (User) beanFactory.getBean("user");
+		System.out.println(user);
+
+		UserFactory userFactory = (UserFactory) beanFactory.getBean("&&user");
+		System.out.println(userFactory);
 	}
 }

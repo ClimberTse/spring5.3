@@ -9,6 +9,11 @@ import org.springframework.stereotype.Component;
 public class OrderServiceImpl implements IOrderService {
 	private IUserService userService;
 
+	@Autowired
+	public OrderServiceImpl(UserServiceImpl userService) {
+		this.userService = userService;
+	}
+
 	@Override
 	public String getOrder() {
 		return "getOrder";

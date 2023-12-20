@@ -525,13 +525,18 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 			logger.trace("Destroying singletons in " + this);
 		}
 		synchronized (this.singletonObjects) {
+			//设置该属性，表示当前beanFactory状态转变为了销毁状态
 			this.singletonsCurrentlyInDestruction = true;
 		}
 
+		//创建单实例时，会检查当前单实例类型是否实现了disposableBean接口
+		//  如果实现了，对应容器销毁时要执行该bean.destroy()方法
 		String[] disposableBeanNames;
 		synchronized (this.disposableBeans) {
 			disposableBeanNames = StringUtils.toStringArray(this.disposableBeans.keySet());
 		}
+
+		//
 		for (int i = disposableBeanNames.length - 1; i >= 0; i--) {
 			destroySingleton(disposableBeanNames[i]);
 		}
@@ -565,13 +570,16 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	public void destroySingleton(String beanName) {
 		// Remove a registered singleton of the given name, if any.
+		//清空三级缓存 + registeredSingletons 里面对应当前beanName的数据
 		removeSingleton(beanName);
 
 		// Destroy the corresponding DisposableBean instance.
 		DisposableBean disposableBean;
 		synchronized (this.disposableBeans) {
+			//注册时会向DisposableBean 内部存放实现了 DisposableBean 接口的bean
 			disposableBean = this.disposableBeans.remove(beanName);
 		}
+		//
 		destroyBean(beanName, disposableBean);
 	}
 
@@ -584,10 +592,13 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	protected void destroyBean(String beanName, @Nullable DisposableBean bean) {
 		// Trigger destruction of dependent beans first...
 		Set<String> dependencies;
+		//dependentBeanMap ？ 保存的是依赖当前bean的其他bean信息
 		synchronized (this.dependentBeanMap) {
 			// Within full synchronization in order to guarantee a disconnected Set
 			dependencies = this.dependentBeanMap.remove(beanName);
 		}
+
+		//因为依赖对象要被回收了，所以依赖当前对象的其他对象，都要执行destroySingletonton 逻辑
 		if (dependencies != null) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Retrieved dependent beans for bean '" + beanName + "': " + dependencies);
@@ -634,6 +645,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		}
 
 		// Remove destroyed bean's prepared dependency information.
+		//dependenciesForBeanMap 保存当前bean依赖了哪些bean
 		this.dependenciesForBeanMap.remove(beanName);
 	}
 

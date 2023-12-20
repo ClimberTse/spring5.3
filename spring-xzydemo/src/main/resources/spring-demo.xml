@@ -4,15 +4,20 @@
 	   xmlns:context="http://www.springframework.org/schema/context"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
 	<bean scope="singleton" id="userService" class="com.xzy.service.impl.UserServiceImpl" parent="userServiceParent">
+<!--		<property name="orderService" ref="orderService"/>-->
+		<constructor-arg name="orderService" ref="orderService"/>
 	</bean>
 
-	<bean scope="singleton" id="orderService" class="com.xzy.service.impl.OrderServiceImpl" abstract="true">
-		<property name="userService" ref="userService"/>
+	<bean scope="singleton" id="orderService" class="com.xzy.service.impl.OrderServiceImpl">
+<!--		<property name="userService" ref="userService"/>-->
+		<constructor-arg name="userService" ref="userService"/>
 	</bean>
 
 	<bean id="userServiceParent" class="com.xzy.service.impl.UserServiceParent">
 		<property name="address" value="深圳宝安"/>
 	</bean>
+
+	<bean id="user" class="com.xzy.entity.UserFactory" factory-bean=""></bean>
 
 <!--	<context:component-scan base-package="com.xzy.service.*">-->
 <!--	</context:component-scan>-->

@@ -69,6 +69,14 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 		return bean;
 	}
 
+	/**
+	 * 判断当前bean实例是否是实现了ApplicationListener接口的实例
+	 * 如果是，当前bean就是一个监听事件的对象，需要把监听者注册到 ApplicationContext 中
+	 *
+	 * @param bean the new bean instance
+	 * @param beanName the name of the bean
+	 * @return
+	 */
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		if (bean instanceof ApplicationListener) {
