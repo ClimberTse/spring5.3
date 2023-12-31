@@ -17,7 +17,7 @@
 		<property name="address" value="深圳宝安"/>
 	</bean>
 
-	<bean id="user" class="com.xzy.entity.UserFactory" factory-bean=""></bean>
+	<bean id="user" class="com.xzy.entity.UserFactory"></bean>
 
 <!--	<context:component-scan base-package="com.xzy.service.*">-->
 <!--	</context:component-scan>-->
